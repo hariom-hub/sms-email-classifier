@@ -6,6 +6,7 @@ import nltk.tokenize.punkt
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
+nltk.download('punkt')
 ps = PorterStemmer()
 
 tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
@@ -42,7 +43,6 @@ def transform_text(text):
 st.title("Emial/SMS Spam Classifier")
 
 input_sms = st.text_area("Enter the message")
-
 
 if st.button("Predict"):
     # 1. Preprocess
