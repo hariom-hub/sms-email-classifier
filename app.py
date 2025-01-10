@@ -6,6 +6,10 @@ import nltk.tokenize.punkt
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
+import os
+# Set the NLTK data path to the local nltk_data folder
+nltk.data.path.append(os.path.join(os.getcwd(), 'nltk_data'))
+
 nltk.download('punkt')
 ps = PorterStemmer()
 
