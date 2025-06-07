@@ -17,34 +17,87 @@ tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
 model = pickle.load(open('model.pkl', 'rb'))
 
 
+# def transform_text(text):
+#     text = text.lower()  # lowercasing
+#     text = nltk.word_tokenize(text)  # tokenization
+#     y = []
+#     # removing special characters
+#     for i in text:
+#         if i.isalnum():
+#             y.append(i)
+#
+#     text = y[:]  # cloning
+#     y.clear()
+#
+#     # removing punctuation
+#     for i in text:
+#         if i not in stopwords.words('english') and i not in string.punctuation:
+#             y.append(i)
+#
+#     text = y[:]
+#     y.clear()
+#
+#     for i in text:
+#         # stemming of words like playing->play
+#         y.append(ps.stem(i))
+#
+#     return " ".join(y)
+
+
+# Replace your transform_text function with this more robust version
+
 def transform_text(text):
-    text = text.lower()  # lowercasing
-    text = nltk.word_tokenize(text)  # tokenization
-    y = []
-    # removing special characters
-    for i in text:
-        if i.isalnum():
-            y.append(i)
+    try:
+        # Convert to lowercase
+        text = text.lower()
 
-    text = y[:]  # cloning
-    y.clear()
+        # Try NLTK tokenization first, fall back to simple split if fails
+        try:
+            text = nltk.word_tokenize(text)
+        except LookupError:
+            # Fallback if NLTK data is missing
+            import re
+            text = re.findall(r'\b\w+\b', text.lower())
+        except Exception:
+            # Ultimate fallback
+            text = text.split()
 
-    # removing punctuation
-    for i in text:
-        if i not in stopwords.words('english') and i not in string.punctuation:
-            y.append(i)
+        # Remove non-alphanumeric characters
+        text = [char for char in text if char.isalnum()]
 
-    text = y[:]
-    y.clear()
+        # Remove stopwords (with fallback)
+        try:
+            from nltk.corpus import stopwords
+            stop_words = set(stopwords.words('english'))
+            text = [char for char in text if char not in stop_words]
+        except LookupError:
+            # Basic English stopwords fallback
+            basic_stopwords = {'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours',
+                               'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers',
+                               'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves',
+                               'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are',
+                               'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does',
+                               'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until',
+                               'while', 'of', 'at', 'by', 'for', 'with', 'through', 'during', 'before', 'after',
+                               'above', 'below', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again',
+                               'further', 'then', 'once'}
+            text = [char for char in text if char not in basic_stopwords]
 
-    for i in text:
-        # stemming of words like playing->play
-        y.append(ps.stem(i))
+        # Stemming with fallback
+        try:
+            from nltk.stem import PorterStemmer
+            ps = PorterStemmer()
+            text = [ps.stem(char) for char in text]
+        except:
+            # Skip stemming if NLTK fails
+            pass
 
-    return " ".join(y)
+        return " ".join(text)
 
-
-st.title("Emial/SMS Spam Classifier")
+    except Exception as e:
+        st.error(f"Error in text processing: {e}")
+        return text  # Return original text if all else fails
+st.title("Email/SMS Spam Classifier")
 
 input_sms = st.text_area("Enter the message")
 

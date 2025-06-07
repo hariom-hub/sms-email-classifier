@@ -1,3 +1,6 @@
 streamlit
-nltk
+pandas
+numpy
 scikit-learn
+nltk>=3.8
+pickle-mixin
